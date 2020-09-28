@@ -16,9 +16,17 @@
    isAllTrue([1, 2, 3, 4, 5], n => n < 10) // вернет true
    isAllTrue([100, 2, 3, 4, 5], n => n < 10) // вернет false
  */
+function is_array(value) {
+  return value &&
+    typeof value === 'object' &&
+    typeof value.length === 'number' &&
+    typeof value.splice === 'function' &&
+    !(value.propertyIsEnumerable('length'));
+};
+
 function isAllTrue(array, fn) {
   if (typeof (fn) !== 'function') throw new Error('fn is not a function');
-  if (!Array.isArray(array) || array.length == 0) throw new Error('empty array');
+  if (!is_array(array) || !array.length) throw new Error('empty array');
   let f = true;
   for (let i = 0; i < array.length; i++) {
     if (!fn(array[i])) f = false;
@@ -44,7 +52,7 @@ function isAllTrue(array, fn) {
  */
 function isSomeTrue(array, fn) {
   if (typeof (fn) !== 'function') throw new Error('fn is not a function');
-  if (!Array.isArray(array) || array.length == 0) throw new Error('empty array');
+  if (!is_array(array) || !array.length) throw new Error('empty array');
   let f = false;
   for (const element of array) {
     if (!fn(element)) f = true;
