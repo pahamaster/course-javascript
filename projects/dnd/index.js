@@ -23,9 +23,18 @@ document.addEventListener('mousemove', (e) => {
 });
 
 export function createDiv() {
+  let div=document.createElement('div');
+  div.style.height='100%';
+  div.style.width='100%';
+  div.style.backgroundColor='#1e5533';
+  div.style.top='40px';
+  div.style.left='50px';
+  return div;
 }
 
 const addDivButton = homeworkContainer.querySelector('#addDiv');
 
 addDivButton.addEventListener('click', function () {
+  newDiv=createDiv();
+  homeworkContainer.appendChild(newDiv);
 });
