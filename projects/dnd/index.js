@@ -26,7 +26,7 @@ export function createDiv() {
   let div=document.createElement('div');
   div.style.height='100%';
   div.style.width='100%';
-  div.style.backgroundColor='#1e5533';
+  div.style.backgroundColor='#'+String(randomNumber());
   div.style.top='40px';
   div.style.left='50px';
   return div;
