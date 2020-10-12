@@ -33,7 +33,10 @@ import './cookie.html';
    const newDiv = document.createElement('div');
    homeworkContainer.appendChild(newDiv);
  */
-const homeworkContainer = document.querySelector('#homework-container');
+
+let cookies;
+
+const homeworkContainer = document.querySelector('#app');
 // текстовое поле для фильтрации cookie
 const filterNameInput = homeworkContainer.querySelector('#filter-name-input');
 // текстовое поле с именем cookie
@@ -45,11 +48,59 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
+function isMatching(full, chunk) {
+  return  !chunk.trim() ? true : full.toLowerCase().includes(chunk.trim().toLowerCase());
+}
+
+function getCookies() {
+  if (document.cookie) {
+    cookies = document.cookie.split('; ').reduce((prev, current) => {
+      const [name, value] = current.split('=');
+      prev[name] = value;
+      return prev;
+    }, {});
+  } else cookies = {};
+}
+
+function reloadTable() {
+  getCookies();
+  listTable.innerHTML = "";
+  for (const cookie in cookies) 
+    if (isMatching(cookie, filterNameInput.value) || isMatching(cookies[cookie], filterNameInput.value)) 
+      addRow(cookie, cookies[cookie]);
+}
+
+function addRow(name, value) {
+  const row = document.createElement("TR");
+  const td1 = document.createElement("TD");
+  td1.appendChild(document.createTextNode(name));
+  const td2 = document.createElement("TD");
+  td2.appendChild(document.createTextNode(value));
+  const but = document.createElement("BUTTON");
+  but.textContent = "Удалить";
+  but.addEventListener('click', e => {
+    document.cookie = `${name}=; max-age = -1`;
+    reloadTable();
+  })
+  row.appendChild(td1);
+  row.appendChild(td2);
+  row.appendChild(but);
+  listTable.appendChild(row);
+}
+
 filterNameInput.addEventListener('input', function () {
+  reloadTable();
 });
 
 addButton.addEventListener('click', () => {
+  document.cookie = `${addNameInput.value}=${addValueInput.value}`;
+  addNameInput.value = '';
+  addValueInput.value = '';
+  //addRow(addNameInput.value, addValueInput.value);
+  reloadTable();
 });
 
 listTable.addEventListener('click', (e) => {
 });
+
+reloadTable();
