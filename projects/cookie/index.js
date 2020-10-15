@@ -49,55 +49,77 @@ const addButton = homeworkContainer.querySelector('#add-button');
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
 function isMatching(full, chunk) {
-  return  !chunk.trim() ? true : full.toLowerCase().includes(chunk.trim().toLowerCase());
+  return !chunk.trim() ? true : full.toLowerCase().includes(chunk.trim().toLowerCase());
 }
 
 function getCookies() {
-  if (document.cookie) {
-    cookies = document.cookie.split('; ').reduce((prev, current) => {
-      const [name, value] = current.split('=');
-      prev[name] = value;
-      return prev;
+ cookies= document.cookie
+    .split('; ')
+    .filter(Boolean)
+    .map((cookie) => cookie.match(/^([^=]+)=(.+)/))
+    .reduce((obj, [, name, value]) => {
+      obj[name] = value;
+      //obj.set(name, value);
+      return obj;
     }, {});
-  } else cookies = {};
 }
 
 function reloadTable() {
   getCookies();
-  listTable.innerHTML = "";
-  for (const cookie in cookies) 
-    if (isMatching(cookie, filterNameInput.value) || isMatching(cookies[cookie], filterNameInput.value)) 
-      addRow(cookie, cookies[cookie]);
+  //listTable.innerHTML = "";
+  for (const cookie in cookies)
+    updateRow(cookie, cookies[cookie]);
+}
+
+function updateRow(name, value) {
+  let findRow;
+  let isMatch = isMatching(name, filterNameInput.value) || isMatching(value, filterNameInput.value);
+  for (const node of listTable.childNodes) {
+    if (node?.firstChild?.textContent == name) findRow = node;
+  }
+  if (findRow === undefined) {
+    if (isMatch) addRow(name, value)
+  } else {
+    if (isMatch)
+      findRow.firstChild.nextElementSibling.textContent = value
+    else listTable.removeChild(findRow);
+  }
+
 }
 
 function addRow(name, value) {
   const row = document.createElement("TR");
-  const td1 = document.createElement("TD");
-  td1.appendChild(document.createTextNode(name));
-  const td2 = document.createElement("TD");
-  td2.appendChild(document.createTextNode(value));
+  const tdName = document.createElement("TD");
+  tdName.textContent=name;
+  const tdValue = document.createElement("TD");
+  tdValue.textContent=value;
   const but = document.createElement("BUTTON");
   but.textContent = "Удалить";
-  but.addEventListener('click', e => {
-    document.cookie = `${name}=; max-age = -1`;
-    reloadTable();
-  })
-  row.appendChild(td1);
-  row.appendChild(td2);
+  row.appendChild(tdName);
+  row.appendChild(tdValue);
   row.appendChild(but);
+  but.addEventListener('click', e => {
+    document.cookie = name+"=; max-age = -1";
+    listTable.removeChild(row);
+  })
   listTable.appendChild(row);
 }
+
 
 filterNameInput.addEventListener('input', function () {
   reloadTable();
 });
 
 addButton.addEventListener('click', () => {
-  document.cookie = `${addNameInput.value}=${addValueInput.value}`;
-  addNameInput.value = '';
-  addValueInput.value = '';
-  //addRow(addNameInput.value, addValueInput.value);
-  reloadTable();
+  const name = encodeURIComponent(addNameInput.value.trim());
+  const value = encodeURIComponent(addValueInput.value.trim());
+  if (name) 
+  {
+    document.cookie = `${name}=${value}`;
+    updateRow(name, value);
+    addNameInput.value = '';
+    addValueInput.value = '';
+  }
 });
 
 listTable.addEventListener('click', (e) => {
