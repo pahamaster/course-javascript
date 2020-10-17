@@ -73,10 +73,13 @@ function reloadTable() {
 
 function updateRow(name, value) {
   let findRow;
-  let isMatch = isMatching(name, filterNameInput.value) || isMatching(value, filterNameInput.value);
-  for (const node of listTable.childNodes) {
+  const isMatch = isMatching(name, filterNameInput.value) || isMatching(value, filterNameInput.value);
+  // for (const node of listTable.childNodes) {
+  //   if (node?.firstChild?.textContent == name) findRow = node;
+  // }
+  listTable.childNodes.forEach(node=>{
     if (node?.firstChild?.textContent == name) findRow = node;
-  }
+  });
   if (findRow === undefined) {
     if (isMatch) addRow(name, value)
   } else {
