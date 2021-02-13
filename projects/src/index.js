@@ -152,7 +152,7 @@ function collectDOMStat(root) {
     texts: 0
   };
 
-  const newProxy={
+  const newProxy = {
     get(target, value) {
       if (value in target) return target[value];
       else return 0;
@@ -215,6 +215,25 @@ function collectDOMStat(root) {
    }
  */
 function observeChildNodes(where, fn) {
+  let observer = new MutationObserver(mutationRecords => {
+    for (const mutationRecord of mutationRecords) {
+        let arg = {};
+        if (mutationRecord.addedNodes.length) {
+          arg.type = 'insert';
+          arg.nodes = [...mutationRecord.addedNodes];
+          fn(arg);
+        } 
+        if (mutationRecord.removedNodes.length) {
+          arg.type = 'remove';
+          arg.nodes = [...mutationRecord.removedNodes];
+          fn(arg);
+        }
+    }
+  });
+  observer.observe(where, {
+    childList: true,           // наблюдать за непосредственными детьми
+    subtree: true              // и более глубокими потомками
+  });
 }
 
 export {
