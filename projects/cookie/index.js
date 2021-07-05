@@ -34,7 +34,7 @@ import './cookie.html';
    homeworkContainer.appendChild(newDiv);
  */
 
-let cookies;
+//let cookies;
 
 const homeworkContainer = document.querySelector('#app');
 // текстовое поле для фильтрации cookie
@@ -52,23 +52,27 @@ function isMatching(full, chunk) {
   return !chunk.trim() ? true : full.toLowerCase().includes(chunk.trim().toLowerCase());
 }
 
+const cookies=getCookies();
+
 function getCookies() {
- cookies= document.cookie
+ return document.cookie
     .split('; ')
     .filter(Boolean)
     .map((cookie) => cookie.match(/^([^=]+)=(.+)/))
     .reduce((obj, [, name, value]) => {
-      obj[name] = value;
-      //obj.set(name, value);
+      //obj[name] = value;
+      obj.set(name, value);
       return obj;
-    }, {});
+    }, new Map()); //{}
 }
 
 function reloadTable() {
-  getCookies();
+  //getCookies();
   //listTable.innerHTML = "";
-  for (const cookie in cookies)
-    updateRow(cookie, cookies[cookie]);
+  // for (const cookie in cookies)
+  //   updateRow(cookie, cookies.cookie);
+  for (const [name, value] of cookies)
+    updateRow(name, value);
 }
 
 function updateRow(name, value) {
@@ -80,14 +84,18 @@ function updateRow(name, value) {
   listTable.childNodes.forEach(node=>{
     if (node?.firstChild?.textContent == name) findRow = node;
   });
-  if (findRow === undefined) {
-    if (isMatch) addRow(name, value)
-  } else {
-    if (isMatch)
-      findRow.firstChild.nextElementSibling.textContent = value
-    else listTable.removeChild(findRow);
-  }
+  // if (!findRow) {
+  //   if (isMatch) addRow(name, value)
+  // } else {
+  //   if (isMatch)
+  //     findRow.firstChild.nextElementSibling.textContent = value
+  //   else listTable.removeChild(findRow);
+  // }
 
+  if (!findRow && isMatch) addRow(name, value);
+  if (findRow) 
+    isMatch ? findRow.firstChild.nextElementSibling.textContent = value :
+              listTable.removeChild(findRow);
 }
 
 function addRow(name, value) {
@@ -103,6 +111,8 @@ function addRow(name, value) {
   row.appendChild(but);
   but.addEventListener('click', e => {
     document.cookie = name+"=; max-age = -1";
+    cookies.delete(name);
+    //delete cookies.name;
     listTable.removeChild(row);
   })
   listTable.appendChild(row);
@@ -119,9 +129,11 @@ addButton.addEventListener('click', () => {
   if (name) 
   {
     document.cookie = `${name}=${value}`;
+    //cookies[name]= value;
+    cookies.set(name, value);
     updateRow(name, value);
-    addNameInput.value = '';
-    addValueInput.value = '';
+    //addNameInput.value = '';
+    //addValueInput.value = '';
   }
 });
 
